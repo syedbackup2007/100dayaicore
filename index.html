@@ -1,204 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔥 100 Day AI Elite</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<title>🔥 100 Day Glow Up</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif;}
 body{
-  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
-  color:#fff;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  margin:0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  color:white;
+  text-align:center;
 }
-.container{width:95%;max-width:430px;}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+
 .card{
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(20px);
-  border-radius:24px;
-  padding:22px;
-  margin-bottom:18px;
-  box-shadow:0 10px 40px rgba(0,0,0,0.4);
-  transition:0.3s;
+  background:rgba(255,255,255,0.05);
+  padding:20px;
+  border-radius:20px;
+  backdrop-filter: blur(10px);
+  margin-top:20px;
 }
-.card:hover{transform:translateY(-6px);}
-h1{text-align:center;margin-bottom:20px;font-size:26px;}
-button{
+
+input,select,button{
   width:100%;
-  padding:14px;
+  padding:12px;
+  margin-top:10px;
   border:none;
-  border-radius:14px;
-  background:linear-gradient(90deg,#ff00cc,#3333ff);
-  color:#fff;
-  font-weight:600;
-  margin-top:14px;
-  cursor:pointer;
-  transition:0.3s;
+  border-radius:10px;
+  font-size:16px;
 }
-button:hover{transform:scale(1.05);}
-progress{width:100%;height:10px;margin-top:10px;}
-.small{font-size:14px;opacity:0.9;margin-top:8px;}
-.stat{font-size:14px;margin-top:6px;}
-.level{font-weight:700;color:#ffccff;}
-.xpText{margin-top:6px;font-size:13px;opacity:0.8;}
+
+button{
+  background:#ff2e63;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+progress{
+  width:100%;
+  height:15px;
+}
+
+h1{color:#ff2e63;}
+.level{color:#00f5d4;font-weight:bold;}
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-<h1>🔥 100 Day AI Elite</h1>
+<h1>🔥 100 Day Glow Up</h1>
 
-<div class="card">
-  <h2 id="day"></h2>
-  <p id="task" class="small">Complete today's mission.</p>
-  <button id="completeBtn">Complete Day</button>
-  <p id="motivation" class="small"></p>
+<!-- ONBOARDING -->
+<div id="setup" class="card">
+<h2>Start Your Journey</h2>
+<input id="name" placeholder="Your Name">
+<input id="age" placeholder="Your Age" type="number">
+
+<select id="goal">
+<option value="weight loss">Weight Loss</option>
+<option value="muscle gain">Muscle Gain</option>
+<option value="healthy lifestyle">Healthy Lifestyle</option>
+<option value="productivity">Productivity</option>
+</select>
+
+<select id="personality">
+<option value="hardcore">Hardcore 🔥</option>
+<option value="balanced">Balanced ⚖️</option>
+<option value="chill">Chill 🌿</option>
+</select>
+
+<button onclick="startApp()">Start 100 Days</button>
 </div>
 
-<div class="card">
-  <div class="stat">Level: <span id="level" class="level"></span></div>
-  <div class="xpText">XP: <span id="xp"></span></div>
-  <progress id="xpBar" max="100" value="0"></progress>
-</div>
+<!-- APP -->
+<div id="app" style="display:none;" class="card">
 
-<div class="card">
-  <div class="stat">🔥 Streak: <span id="streak"></span></div>
-  <div class="stat">💪 Discipline: <span id="discipline"></span></div>
-  <div class="stat">🎯 Focus: <span id="focus"></span></div>
-  <div class="stat">⚡ Consistency: <span id="consistency"></span></div>
-</div>
+<h2 id="welcome"></h2>
 
+<p id="day"></p>
+<p id="streak"></p>
+<p class="level" id="level"></p>
+<p id="xp"></p>
+
+<progress id="progressBar" max="100" value="1"></progress>
+
+<h3>Today's Plan</h3>
+<p id="task"></p>
+
+<button onclick="completeDay()">Complete Day ✅</button>
+<button onclick="shareProgress()">Share Progress 📤</button>
+<button onclick="askAI()">Ask AI Assistant 🤖</button>
+
+<div id="aiResponse" style="margin-top:15px;"></div>
+
+</div>
 </div>
 
 <script>
 
-const dayEl=document.getElementById("day");
-const taskEl=document.getElementById("task");
-const motivationEl=document.getElementById("motivation");
-const completeBtn=document.getElementById("completeBtn");
-
-const xpEl=document.getElementById("xp");
-const xpBar=document.getElementById("xpBar");
-const levelEl=document.getElementById("level");
-const streakEl=document.getElementById("streak");
-
-const disciplineEl=document.getElementById("discipline");
-const focusEl=document.getElementById("focus");
-const consistencyEl=document.getElementById("consistency");
-
-/* DATA SYSTEM */
 function getData(){
-  let data=JSON.parse(localStorage.getItem("eliteApp"));
+  let data=JSON.parse(localStorage.getItem("glowApp"));
   if(!data){
     data={
-      currentDay:1,
+      name:"",
+      age:"",
+      goal:"",
+      personality:"",
+      day:1,
       streak:0,
-      lastComplete:0,
       xp:0,
       level:1,
-      discipline:0,
-      focus:0,
-      consistency:0
+      lastComplete:0
     };
-    localStorage.setItem("eliteApp",JSON.stringify(data));
   }
   return data;
 }
 
 function saveData(data){
-  localStorage.setItem("eliteApp",JSON.stringify(data));
+  localStorage.setItem("glowApp",JSON.stringify(data));
 }
 
-function getLevelName(level){
-  if(level<3) return "Rookie";
-  if(level<6) return "Builder";
-  if(level<10) return "Beast";
-  return "Elite";
-}
-
-function updateUI(data){
-  dayEl.innerText="Day "+data.currentDay;
-  streakEl.innerText=data.streak;
-
-  xpEl.innerText=data.xp;
-  xpBar.value=data.xp % 100;
-  levelEl.innerText=getLevelName(data.level)+" (Lv."+data.level+")";
-
-  disciplineEl.innerText=data.discipline;
-  focusEl.innerText=data.focus;
-  consistencyEl.innerText=data.consistency;
-}
-
-updateUI(getData());
-
-/* COMPLETE DAY */
-completeBtn.onclick=async()=>{
+function startApp(){
   let data=getData();
+  data.name=document.getElementById("name").value;
+  data.age=document.getElementById("age").value;
+  data.goal=document.getElementById("goal").value;
+  data.personality=document.getElementById("personality").value;
+
+  saveData(data);
+
+  document.getElementById("setup").style.display="none";
+  document.getElementById("app").style.display="block";
+
+  loadApp();
+  generatePlan();
+}
+
+function loadApp(){
+  let data=getData();
+
+  document.getElementById("welcome").innerText=
+    `Welcome ${data.name} 🔥`;
+
+  document.getElementById("day").innerText=
+    `Day ${data.day}/100`;
+
+  document.getElementById("streak").innerText=
+    `🔥 Streak: ${data.streak}`;
+
+  document.getElementById("xp").innerText=
+    `XP: ${data.xp}`;
+
+  document.getElementById("level").innerText=
+    `Level ${data.level}`;
+
+  document.getElementById("progressBar").value=data.day;
+}
+
+async function generatePlan(){
+  let data=getData();
+
+  const res=await fetch("/.netlify/functions/ai",{
+    method:"POST",
+    body:JSON.stringify({
+      type:"plan",
+      name:data.name,
+      age:data.age,
+      goal:data.goal,
+      personality:data.personality,
+      day:data.day
+    })
+  });
+
+  const result=await res.json();
+  document.getElementById("task").innerText=result.reply;
+}
+
+function completeDay(){
+  let data=getData();
+
   const now=Date.now();
   const diff=now-data.lastComplete;
 
   if(diff<86400000){
-    alert("⏳ Come back tomorrow.");
+    alert("Come back tomorrow 🔥");
     return;
   }
 
-  let newStreak=data.streak;
-  if(diff>172800000) newStreak=0;
+  if(diff>172800000) data.streak=0;
 
-  data.currentDay+=1;
-  data.streak=newStreak+1;
-  data.lastComplete=now;
+  data.day++;
+  data.streak++;
+  data.xp+=50;
 
-  const gainedXP=25+Math.floor(Math.random()*15);
-  data.xp+=gainedXP;
-
-  if(data.xp>=data.level*100){
-    data.level+=1;
+  if(data.xp>=data.level*200){
+    data.level++;
   }
 
-  data.discipline+=2;
-  data.focus+=2;
-  data.consistency+=3;
+  data.lastComplete=now;
 
   saveData(data);
-  updateUI(data);
+  loadApp();
+  generatePlan();
+}
 
-  getAIMessage(data.currentDay,data.streak);
-};
+function shareProgress(){
+  let data=getData();
+  const text=`🔥 I am on Day ${data.day} of my 100 Day ${data.goal} Challenge! Level ${data.level}!`;
 
-/* AI */
-async function getAIMessage(day,streak){
-  try{
-    const res=await fetch("/.netlify/functions/ai",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({day,streak})
-    });
-
-    const data=await res.json();
-
-    taskEl.innerText=data.task;
-    motivationEl.innerText="🔥 "+data.motivation;
-
-  }catch{
-    taskEl.innerText="Do 30 minutes of deep focused work.";
-    motivationEl.innerText="Consistency builds empires.";
+  if(navigator.share){
+    navigator.share({text});
+  }else{
+    alert(text);
   }
 }
 
-/* SERVICE WORKER */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+async function askAI(){
+  let question=prompt("Ask your AI Coach anything:");
+
+  if(!question) return;
+
+  const res=await fetch("/.netlify/functions/ai",{
+    method:"POST",
+    body:JSON.stringify({
+      type:"assistant",
+      question:question
+    })
+  });
+
+  const result=await res.json();
+  document.getElementById("aiResponse").innerText=result.reply;
+}
+
+if(localStorage.getItem("glowApp")){
+  document.getElementById("setup").style.display="none";
+  document.getElementById("app").style.display="block";
+  loadApp();
+  generatePlan();
 }
 
 </script>
-
 </body>
 </html>
