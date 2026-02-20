@@ -3,28 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔥 100 Day Glow Up</title>
+<title>🔥 100 Day AI Transformation</title>
 
 <style>
 body{
   margin:0;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
   color:white;
   text-align:center;
 }
 
 .container{
-  max-width:500px;
+  max-width:520px;
   margin:auto;
   padding:20px;
 }
 
 .card{
-  background:rgba(255,255,255,0.05);
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
   padding:20px;
   border-radius:20px;
-  backdrop-filter: blur(10px);
   margin-top:20px;
 }
 
@@ -32,8 +32,8 @@ input,select,button{
   width:100%;
   padding:12px;
   margin-top:10px;
+  border-radius:12px;
   border:none;
-  border-radius:10px;
   font-size:16px;
 }
 
@@ -44,13 +44,25 @@ button{
   cursor:pointer;
 }
 
-progress{
-  width:100%;
-  height:15px;
+button:hover{
+  opacity:0.9;
 }
 
-h1{color:#ff2e63;}
-.level{color:#00f5d4;font-weight:bold;}
+progress{
+  width:100%;
+  height:16px;
+  border-radius:20px;
+}
+
+.level{
+  color:#00f5d4;
+  font-weight:bold;
+}
+
+canvas{
+  margin-top:15px;
+  border-radius:20px;
+}
 </style>
 </head>
 
@@ -58,13 +70,12 @@ h1{color:#ff2e63;}
 
 <div class="container">
 
-<h1>🔥 100 Day Glow Up</h1>
+<h1>🔥 100 Day Transformation</h1>
 
-<!-- ONBOARDING -->
+<!-- SETUP -->
 <div id="setup" class="card">
-<h2>Start Your Journey</h2>
 <input id="name" placeholder="Your Name">
-<input id="age" placeholder="Your Age" type="number">
+<input id="age" type="number" placeholder="Your Age">
 
 <select id="goal">
 <option value="weight loss">Weight Loss</option>
@@ -79,29 +90,30 @@ h1{color:#ff2e63;}
 <option value="chill">Chill 🌿</option>
 </select>
 
-<button onclick="startApp()">Start 100 Days</button>
+<button onclick="startApp()">Start Challenge</button>
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none;" class="card">
+<div id="app" class="card" style="display:none">
 
 <h2 id="welcome"></h2>
 
 <p id="day"></p>
 <p id="streak"></p>
-<p class="level" id="level"></p>
 <p id="xp"></p>
+<p class="level" id="level"></p>
 
 <progress id="progressBar" max="100" value="1"></progress>
 
-<h3>Today's Plan</h3>
-<p id="task"></p>
+<h3>🎯 Daily Task</h3>
+<p id="dailyTask"></p>
 
 <button onclick="completeDay()">Complete Day ✅</button>
-<button onclick="shareProgress()">Share Progress 📤</button>
-<button onclick="askAI()">Ask AI Assistant 🤖</button>
+<button onclick="generateShareImage()">Share Progress 📸</button>
+<button onclick="askAI()">Ask AI Coach 🤖</button>
 
 <div id="aiResponse" style="margin-top:15px;"></div>
+<canvas id="shareCanvas" width="400" height="400"></canvas>
 
 </div>
 </div>
@@ -109,7 +121,7 @@ h1{color:#ff2e63;}
 <script>
 
 function getData(){
-  let data=JSON.parse(localStorage.getItem("glowApp"));
+  let data=JSON.parse(localStorage.getItem("transformApp"));
   if(!data){
     data={
       name:"",
@@ -127,53 +139,41 @@ function getData(){
 }
 
 function saveData(data){
-  localStorage.setItem("glowApp",JSON.stringify(data));
+  localStorage.setItem("transformApp",JSON.stringify(data));
 }
 
 function startApp(){
   let data=getData();
-  data.name=document.getElementById("name").value;
-  data.age=document.getElementById("age").value;
-  data.goal=document.getElementById("goal").value;
-  data.personality=document.getElementById("personality").value;
-
+  data.name=name.value;
+  data.age=age.value;
+  data.goal=goal.value;
+  data.personality=personality.value;
   saveData(data);
 
-  document.getElementById("setup").style.display="none";
-  document.getElementById("app").style.display="block";
+  setup.style.display="none";
+  app.style.display="block";
 
   loadApp();
-  generatePlan();
+  generateDailyTask();
 }
 
 function loadApp(){
   let data=getData();
-
-  document.getElementById("welcome").innerText=
-    `Welcome ${data.name} 🔥`;
-
-  document.getElementById("day").innerText=
-    `Day ${data.day}/100`;
-
-  document.getElementById("streak").innerText=
-    `🔥 Streak: ${data.streak}`;
-
-  document.getElementById("xp").innerText=
-    `XP: ${data.xp}`;
-
-  document.getElementById("level").innerText=
-    `Level ${data.level}`;
-
-  document.getElementById("progressBar").value=data.day;
+  welcome.innerText=`Welcome ${data.name} 🔥`;
+  day.innerText=`Day ${data.day}/100`;
+  streak.innerText=`🔥 Streak: ${data.streak}`;
+  xp.innerText=`XP: ${data.xp}`;
+  level.innerText=`Level ${data.level}`;
+  progressBar.value=data.day;
 }
 
-async function generatePlan(){
+async function generateDailyTask(){
   let data=getData();
 
   const res=await fetch("/.netlify/functions/ai",{
     method:"POST",
     body:JSON.stringify({
-      type:"plan",
+      type:"daily",
       name:data.name,
       age:data.age,
       goal:data.goal,
@@ -183,12 +183,11 @@ async function generatePlan(){
   });
 
   const result=await res.json();
-  document.getElementById("task").innerText=result.reply;
+  dailyTask.innerText=result.reply;
 }
 
 function completeDay(){
   let data=getData();
-
   const now=Date.now();
   const diff=now-data.lastComplete;
 
@@ -211,42 +210,63 @@ function completeDay(){
 
   saveData(data);
   loadApp();
-  generatePlan();
-}
-
-function shareProgress(){
-  let data=getData();
-  const text=`🔥 I am on Day ${data.day} of my 100 Day ${data.goal} Challenge! Level ${data.level}!`;
-
-  if(navigator.share){
-    navigator.share({text});
-  }else{
-    alert(text);
-  }
+  generateDailyTask();
 }
 
 async function askAI(){
-  let question=prompt("Ask your AI Coach anything:");
+  let question=prompt("Ask your AI Coach:");
 
   if(!question) return;
+
+  let data=getData();
 
   const res=await fetch("/.netlify/functions/ai",{
     method:"POST",
     body:JSON.stringify({
       type:"assistant",
-      question:question
+      question:question,
+      goal:data.goal,
+      personality:data.personality
     })
   });
 
   const result=await res.json();
-  document.getElementById("aiResponse").innerText=result.reply;
+  aiResponse.innerText=result.reply;
 }
 
-if(localStorage.getItem("glowApp")){
-  document.getElementById("setup").style.display="none";
-  document.getElementById("app").style.display="block";
+function generateShareImage(){
+  let data=getData();
+  const canvas=document.getElementById("shareCanvas");
+  const ctx=canvas.getContext("2d");
+
+  ctx.fillStyle="#0f0c29";
+  ctx.fillRect(0,0,400,400);
+
+  ctx.fillStyle="#ff2e63";
+  ctx.font="bold 26px Poppins";
+  ctx.fillText("🔥 100 Day Challenge",50,60);
+
+  ctx.fillStyle="white";
+  ctx.font="20px Poppins";
+  ctx.fillText(`Name: ${data.name}`,50,120);
+  ctx.fillText(`Goal: ${data.goal}`,50,160);
+  ctx.fillText(`Day: ${data.day}`,50,200);
+  ctx.fillText(`Level: ${data.level}`,50,240);
+  ctx.fillText(`Streak: ${data.streak}`,50,280);
+
+  const image=canvas.toDataURL("image/png");
+
+  const link=document.createElement("a");
+  link.href=image;
+  link.download="progress.png";
+  link.click();
+}
+
+if(localStorage.getItem("transformApp")){
+  setup.style.display="none";
+  app.style.display="block";
   loadApp();
-  generatePlan();
+  generateDailyTask();
 }
 
 </script>
